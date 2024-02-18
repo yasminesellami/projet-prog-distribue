@@ -1,17 +1,16 @@
-FROM openjdk:11-jdk-slim as build
-WORKDIR /workspace/app
+# Utilisez une image de base avec Java
+FROM openjdk:17-alpine
 
-# Copier le wrapper Maven et accorder les permissions d'exécution
+# Définissez le répertoire de travail
+WORKDIR /app
+
+# Copiez le fichier JAR généré par Maven dans le conteneur
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
-RUN chmod +x ./mvnw
+# Exposez le port sur lequel l'application Spring Boot écoute
+EXPOSE 8080
 
-# Maintenant, exécuter le wrapper Maven pour construire le projet
-RUN ./mvnw install -DskipTests
-
-FROM openjdk:11-jre-slim
-VOLUME /tmp
-COPY --from=build /workspace/app/target/*.jar app.jar
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
+# Commande de démarrage de l'application
+CMD ["java", "-jar", "app.jar"]
